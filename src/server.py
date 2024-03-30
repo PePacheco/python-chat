@@ -1,9 +1,10 @@
 import socket
 import threading
+from typing import Dict
 
 HOST = "127.0.0.1"  # Endereço IP do servidor
 PORT = 12345  # Porta para conexão
-CLIENTS = {}
+CLIENTS: Dict[str, socket.socket] = {}
 
 def handle_client(client_socket, address):
     nickname = client_socket.recv(1024).decode("utf-8")
@@ -11,7 +12,7 @@ def handle_client(client_socket, address):
 
     print(f"{nickname} entrou no chat.")
     while True:
-        message = client_socket.recv(1024).decode("utf-8")
+        message: str = client_socket.recv(1024).decode("utf-8")
         if message == "/quit":
             break
         elif message.startswith("/msg"):
@@ -32,7 +33,7 @@ def handle_client(client_socket, address):
     client_socket.close()
 
 def main():
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((HOST, PORT))
     server_socket.listen(5)
 
