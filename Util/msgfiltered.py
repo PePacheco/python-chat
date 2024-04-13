@@ -13,4 +13,5 @@ class Msgfiltered:
 
         if len(parts) == 3:
             self.message_content = parts[2]
-        
+
+        return self

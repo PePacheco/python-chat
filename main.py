@@ -3,10 +3,9 @@ from Util.connection import Connection
 from Util.msgfiltered import Msgfiltered
 from Util.servercontroller import ServerController
 import servertcp
-import Server
 
 connection = Connection().SetName('127.0.0.1').SetPort(12345).SetProtocol('TCP')
-server_tcp = servertcp()
+server_tcp = servertcp.ServerTCP()
 
 
 server_tcp.handle_new_client(connection)
