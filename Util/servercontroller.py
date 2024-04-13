@@ -32,7 +32,7 @@ class ServerController:
         for other in self.users.items():
             if other.name == user.message.second_command:
                 user.send_message(other.client_address)
-    
+
     def reg_connection(self, msg_filter, client_address, c_socket):
         if msg_filter.primary_command != self.REG:
             return

@@ -13,7 +13,7 @@ class ServerTCP:
             connection_socket, client_address = tcp_connection.get_socket().accept()
             received_message = connection_socket.recv(1024).decode()
             msg = msg_filter.process_message(0, received_message)
-            s_controller.reg_connection(msg_filter, client_address, connection_socket)
+            s_controller.reg_connection(msg, client_address, connection_socket)
 
     def handle_client_send(self, connection):
         while True:
