@@ -20,8 +20,7 @@ def receber_dados(client_socket):
         # Recebe dados do servidor
         message = client_socket.recv(1024)
         if message:
-            msg = msg_filter.process_message(message.decode())
-            print(f"{msg.param1}: {msg.param2}")
+            print(message.decode())
 
 clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 clientSocket.connect((serverName,serverPort))
