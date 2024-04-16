@@ -20,7 +20,7 @@ def send_data(client_socket, message):
             with open(abs_path, 'rb') as file:
                 file_data = file.read()
                 print(file_data)
-                message_to_send = f"{entry} {len(file_data)}".encode() + file_data
+                message_to_send = f"{entry} ".encode() + file_data
                 client_socket.sendall(message_to_send)
             client_socket.send(entry.encode())
         else:
@@ -31,8 +31,7 @@ def receive_data(client_socket):
         # Recebe dados do servidor
         message = client_socket.recv(1024)
         if message:
-            msg = msg_filter.process_message(message.decode())
-            print(f"{msg.param1}: {msg.param2}")
+           print(message.decode())
 
 clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 clientSocket.connect((serverName,serverPort))

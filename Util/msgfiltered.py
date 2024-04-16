@@ -12,13 +12,11 @@ class Msgfiltered:
 
         msg = message.split(" ", 1)
         self.param1 = msg[0]
-        print(self.param1)
 
         if self.param1 != cmds.ALL and self.param1 != cmds.REG:
             msg = msg[1].split(" ", 1)
             self.param2 = msg[0]
             self.param3 = msg[1]
-            print("Cagou")
             return self
         print(f'{msg[1]}')
         self.param2 = msg[1]
