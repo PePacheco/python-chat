@@ -14,8 +14,17 @@ def send_data(client_socket, message):
         entry = input("Digite uma mensagem para enviar (ou EXIT para sair): ")
         if entry.upper() == "EXIT":
             break
-        message = entry.split(' ')[1]
-        abs_path = os.path.abspath(message)
+        entry_split= entry.split(' ')
+        first_arg = entry_split[0]
+        second_arg = entry_split[1]
+        if len(entry_split) == 3:
+            third_arg = entry_split[2]
+        if first_arg == '\\ALL':
+            abs_path = os.path.abspath(second_arg)
+        elif first_arg == '\\PV':
+            abs_path = os.path.abspath(third_arg)
+        else:
+                abs_path = ''
         if os.path.isfile(abs_path):
             with open(abs_path, 'rb') as file:
                 file_data = file.read()
