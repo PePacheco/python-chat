@@ -1,27 +1,71 @@
-from socket import *
+import sys
+import threading
+import os
+import socket
+from Util.msgfiltered import Msgfiltered
 
-serverName = '192.168.2.107'
-serverPort1 = 12000
-serverPort2 = 12001
+serverName = '127.0.0.1'
+serverPort = 12345
+msg_filter = Msgfiltered()
 
-serverPort = 12000
+def send_data(client_socket, message):
+    while True:
+        # Aguarda entrada do usuário
+        entry = input("Digite uma mensagem para enviar (ou EXIT para sair): ")
+        if entry.upper() == "EXIT":
+            break
+        entry_split= entry.split(' ')
+        print(entry_split)
+        first_arg = entry_split[0]
+        second_arg = entry_split[1]
+        if len(entry_split) == 3:
+            third_arg = entry_split[2]
+        else:
+            third_arg = ''
+        if first_arg == '\\ALL':
+            abs_path = os.path.abspath(second_arg)
+        elif first_arg == '\\PV':
+            abs_path = os.path.abspath(third_arg)
+        else:
+            abs_path = ''
 
-clientSocket = socket(AF_INET, SOCK_DGRAM)
+        if os.path.isfile(abs_path):
+            with open(abs_path, 'rb') as arquivo:
+                while True:
+                    dados = arquivo.read(1024)  # Lê 1024 bytes do arquivo
+                    if not dados:
+                        break  # Se não houver mais dados, termina o loop
+                    print(dados)
+                    if third_arg == '':
+                        clientSocket.sendto((first_arg + " " + second_arg + " ").encode() + dados, (serverName, serverPort))
+                    else:
+                        clientSocket.sendto((first_arg + " " + second_arg + " " + third_arg + " ").encode() + dados, (serverName, serverPort))
+        else:
+            clientSocket.sendto(entry.encode(), (serverName, serverPort))
 
-port1: bool = True
+def receive_data(client_socket):
+    global serverPort 
+    serverPort = int(client_socket.recv(1024).decode())
+    print("Recaminhaou a porta", serverPort)
+    while True:
+        # Recebe dados do servidor
+        message = client_socket.recv(1024)
+        if message:
+           print(message.decode())
 
-while True:
-    message = input('Input lowercase sentence:')
+clientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-    if port1:
-        serverPort = serverPort1
-    else: 
-        serverPort = serverPort2
-    
-    clientSocket.sendto(message.encode(), (serverName, serverPort))
-    modifiedMessage, serverAddress =  clientSocket.recvfrom(2048)
-    print(modifiedMessage.decode())
+message = input('Adicione um username para entrar no chat :> ')
 
-    port1 = not port1
+msg = msg_filter.process_message(message)
 
-clientSocket.close()
+if msg.param1 != "\\REG" and msg.param3 != None:
+    sys.exit()
+
+clientSocket.sendto(message.encode(), (serverName, serverPort))
+
+enviar_thread = threading.Thread(target=send_data, args=(clientSocket, None))
+receber_thread = threading.Thread(target=receive_data, args=(clientSocket,))
+
+enviar_thread.start()
+receber_thread.start()

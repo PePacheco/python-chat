@@ -2,17 +2,11 @@ from Util.user import User
 from Util.msgfiltered import Msgfiltered
 import threading
 from Util.commands import Commands
+from socket import *
 
 cmds = Commands()
 
 msg_filter = Msgfiltered()
-
-def send_message(user):
-        t = user.socket.recv(1024).decode()
-        print(t)
-        message = msg_filter.process_message(t)
-        user.messages.append(message)
-        print(f'A thread do {user.username} recebeu a msg')
 
 class ServerController:
 
@@ -36,8 +30,17 @@ class ServerController:
         for other in self.users:
             if other.username != user.username:
                 msg = user.message
-                msg = f'\n\n{user.username}: {msg.param2}'
-                other.socket.send(msg.encode())
+    
+                if user.message.param3:
+                    msg = f'\n\n{user.username}: {msg.param2} {msg.param3}'
+                else:
+                    msg = f'\n\n{user.username}: {msg.param2}'
+
+                if other.socket.type == SOCK_STREAM:
+                    other.socket.send(msg.encode())
+                else:
+                    other.socket.sendto(msg.encode(), other.client_address)
+
                 user.next_msg_filtered()
 
     def send_pv_msg(self, user):
@@ -48,17 +51,20 @@ class ServerController:
             if other.username == user.message.param2:
                 msg = user.message
                 msg = f'\n\n{user.username}: {msg.param3}'
-                other.socket.send(msg.encode())
+                if other.socket.type == SOCK_STREAM:
+                    other.socket.send(msg.encode())
+                else:
+                    other.socket.sendto(msg.encode(), other.client_address)
                 user.next_msg_filtered()
                 break
 
     def reg_connection(self, msg_filter, client_address, c_socket):
-        
+
         if msg_filter.param1 != cmds.REG:
             return
 
         user = User(self.id, msg_filter.param2, client_address, c_socket)
-        
+
         users_set = set(self.users)
         finded_user = user.username in users_set
 
@@ -72,7 +78,3 @@ class ServerController:
 
         print(f"Usuario {newUser.username} adicionado!!!")
         return user
-    
-    def user_thread_receive(user, connection_socket):
-        message = msg_filter.process_message(connection_socket.recv(1024).decode())
-        user.messages(message)

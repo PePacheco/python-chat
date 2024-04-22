@@ -1,6 +1,6 @@
 import threading
 from Util.msgfiltered import Msgfiltered
-
+from socket import *
 msg_filter = Msgfiltered()
 
 class User:
@@ -17,9 +17,16 @@ class User:
 
     def rec_message(self):
         while self.online:
-            message = msg_filter.process_message(self.socket.recv(1024).decode())
-            self.messages.append(message)
-            print(f'A thread do {self.username} recebeu a msg')
+            message = ''
+            if self.socket.type == SOCK_STREAM:
+                message = msg_filter.process_message(self.socket.recv(1024).decode())
+            else:
+                msg, clientAddres = self.socket.recvfrom(1024)
+                message = msg_filter.process_message(msg.decode())
+            print(message.param1, message.param2, message.param3)
+            if message:
+                self.messages.append(message)
+            
         self.threading.join()
 
     def next_msg_filtered(self):
@@ -29,5 +36,4 @@ class User:
 
     def disconnect(self):
         self.threading.join()
-        
-   
+
